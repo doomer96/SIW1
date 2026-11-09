@@ -1,0 +1,69 @@
+=== PRIMARY-KEY LOOKUP (HashMap) ===
+Bohemian Rhapsody
+
+=== EQUALITY AND HASHING (UUID business key) ===
+Same UUID objects in HashSet: 1
+
+=== CATEGORY INDEX (Map<String, Set<Track>>) ===
+Rock tracks: 1
+Category counts: {audiobook=1, podcast=1, pop=1, rock=1}
+
+=== NATURAL ORDER (Comparable: title) ===
+- 1984 | George Orwell | 660:00
+- Blinding Lights | The Weeknd | 3:20
+- Bohemian Rhapsody | Queen | 5:54
+- Tech Talk | Radio Tech | 65:00
+
+=== CUSTOM COMPARATORS ===
+By artist, then title:
+- 1984 | George Orwell | 660:00
+- Bohemian Rhapsody | Queen | 5:54
+- Tech Talk | Radio Tech | 65:00
+- Blinding Lights | The Weeknd | 3:20
+By duration, longest first:
+- 1984 | George Orwell | 660:00
+- Tech Talk | Radio Tech | 65:00
+- Bohemian Rhapsody | Queen | 5:54
+- Blinding Lights | The Weeknd | 3:20
+By play count, highest first:
+- 1984 | George Orwell | 660:00
+- Blinding Lights | The Weeknd | 3:20
+- Bohemian Rhapsody | Queen | 5:54
+- Tech Talk | Radio Tech | 65:00
+
+=== REQUEST QUEUE (PriorityQueue) ===
+priority=9, trackId=139a1571-4866-417b-ad58-d024cb3a095d, requester=Davlet
+priority=9, trackId=bfe2ee92-0bb0-465f-b921-50632a6ce522, requester=Davlet
+priority=3, trackId=06893d47-25a4-4593-9ee7-952e6ca8759b, requester=Davlet
+
+=== OPERATOR PROCESSES REQUESTS ===
+Playing podcast: Tech Talk #42
+Playing song: Blinding Lights
+Requests still pending: 1
+
+=== SYNCHRONIZED UPDATE ===
+Updated repository title: Bohemian Rhapsody - Remastered
+Updated title in Favorites: Bohemian Rhapsody - Remastered
+New category index size: 1
+
+=== SYNCHRONIZED DELETE ===
+Blinding Lights still in Study: false
+Total tracks after deletion: 3
+
+=== PLAYBACK HISTORY AND EXPORT ===
+Favorites history: [Tech Talk, Blinding Lights]
+Playlist: Favorites
+1. Queen - Bohemian Rhapsody - Remastered (6:00)
+2. Radio Tech - Tech Talk (65:00)
+Total: 71 min
+
+=== ANALYTICS REPORT ===
+Library tracks: 3
+Playlist entries: 3
+Library duration (seconds): 43860
+Estimated royalties: 5.002
+Playlist sizes: {Favorites=2, Study=1}
+Registered listeners: 1
+
+=== VALIDATION EXAMPLE ===
+Expected role validation: Only LISTENER users can submit playback requests

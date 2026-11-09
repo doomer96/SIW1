@@ -1,0 +1,153 @@
+@startuml
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+hide empty members
+
+package "model" {
+  abstract class Track {
+    - id: UUID {readOnly}
+    - title: String
+    - artist: String
+    - durationSeconds: int
+    - playCount: int
+    + compareTo(other: Track): int
+    + equals(object): boolean
+    + hashCode(): int
+    + getCategoryKey(): String
+    + calculateRoyalty(): double
+  }
+  class Song {
+    - album: String
+    - genre: String
+    + play(): void
+    + download(): void
+  }
+  class Podcast {
+    - host: String
+    - episodeNumber: int
+    + play(): void
+  }
+  class Audiobook {
+    - narrator: String
+    - totalChapters: int
+    - currentChapter: int
+    + play(): void
+    + download(): void
+  }
+  interface Playable {
+    + play(): void
+    + stop(): void
+  }
+  interface Downloadable {
+    + getFileSizeMb(): double
+    + download(): void
+  }
+  class Playlist {
+    - id: UUID {readOnly}
+    - name: String
+    - tracks: Set<Track>
+    - history: PlaybackHistory
+    + addTrack(track): boolean
+    + removeTrack(trackId): boolean
+  }
+  class PlaybackHistory {
+    - id: UUID {readOnly}
+    - entries: List<String>
+    + record(title): void
+  }
+  class User {
+    - id: UUID {readOnly}
+    - name: String
+    - role: UserRole
+  }
+  enum UserRole {
+    LISTENER
+    OPERATOR
+  }
+  class PlaybackRequest {
+    - id: UUID {readOnly}
+    - requesterId: UUID
+    - requesterName: String
+    - trackId: UUID
+    - priority: int
+    - submittedAt: Instant
+    - sequenceNumber: long
+    - status: RequestStatus
+    + compareTo(other): int
+  }
+  enum RequestStatus {
+    PENDING
+    PROCESSED
+    CANCELLED
+  }
+}
+
+package "repository" {
+  class TrackRepository {
+    - tracks: List<Track>
+    - byId: Map<UUID, Track>
+    - byCategory: Map<String, Set<Track>>
+    + add(track): void
+    + update(track): Track
+    + remove(id): Optional<Track>
+    + findById(id): Optional<Track>
+  }
+  class PlaylistRepository {
+    - playlists: List<Playlist>
+    - byId: Map<UUID, Playlist>
+  }
+  class UserRepository {
+    - users: List<User>
+    - byId: Map<UUID, User>
+    - byRole: Map<UserRole, Set<User>>
+  }
+}
+
+package "service" {
+  class PlaylistManager {
+    - playbackQueue: Queue<PlaybackRequest>
+    - requestsById: Map<UUID, PlaybackRequest>
+    + addTrack(track): void
+    + updateTrack(track): void
+    + removeTrack(id): boolean
+    + submitPlaybackRequest(user, trackId, priority): PlaybackRequest
+    + processNextPlaybackRequest(operator): Optional<PlaybackRequest>
+    + getTracksSorted(comparator): List<Track>
+  }
+  class TrackComparators <<utility>> {
+    + BY_TITLE: Comparator<Track>
+    + BY_ARTIST_THEN_TITLE: Comparator<Track>
+    + BY_DURATION_DESC: Comparator<Track>
+    + BY_PLAY_COUNT_DESC: Comparator<Track>
+  }
+  class PlaylistExporter {
+    + export(playlist): void
+  }
+}
+
+Track <|-- Song
+Track <|-- Podcast
+Track <|-- Audiobook
+Playable <|.. Song
+Playable <|.. Podcast
+Playable <|.. Audiobook
+Downloadable <|.. Song
+Downloadable <|.. Audiobook
+
+Playlist *-- PlaybackHistory : composition
+Playlist o-- "0..*" Track : contains
+User --> UserRole
+PlaybackRequest --> RequestStatus
+PlaybackRequest --> User : requester ID
+PlaybackRequest --> Track : track ID
+
+PlaylistManager *-- TrackRepository
+PlaylistManager *-- PlaylistRepository
+PlaylistManager *-- UserRepository
+PlaylistManager o-- "0..*" PlaybackRequest : PriorityQueue
+TrackRepository ..> Track
+PlaylistRepository ..> Playlist
+UserRepository ..> User
+TrackComparators ..> Track
+PlaylistExporter ..> Playlist
+@enduml
