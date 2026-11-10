@@ -23,11 +23,6 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.UUID;
 
-/**
- * Application service. Public operations synchronize repository, playlist and queue state.
- * HashMap lookups provide average O(1) access by UUID; the PriorityQueue processes
- * higher-priority requests first and keeps FIFO order for equal priorities.
- */
 public class PlaylistManager {
     private final TrackRepository trackRepository = new TrackRepository();
     private final PlaylistRepository playlistRepository = new PlaylistRepository();
@@ -41,7 +36,6 @@ public class PlaylistManager {
         trackRepository.add(track);
     }
 
-    /** Replaces a track and updates every playlist reference and category index. */
     public synchronized void updateTrack(Track replacement) {
         Track oldTrack = trackRepository.update(replacement);
         for (Playlist playlist : playlistRepository.findAll()) {
@@ -49,7 +43,6 @@ public class PlaylistManager {
         }
     }
 
-    /** Also removes pending requests for the deleted track. */
     public synchronized boolean removeTrack(UUID trackId) {
         Optional<Track> removed = trackRepository.remove(trackId);
         if (!removed.isPresent()) return false;
@@ -109,7 +102,6 @@ public class PlaylistManager {
         return playlistRepository.findByName(name);
     }
 
-    /** Backward-compatible lookup method from the first project. */
     public synchronized Playlist findByName(String name) {
         return playlistRepository.findByName(name).orElse(null);
     }
@@ -121,7 +113,7 @@ public class PlaylistManager {
     public synchronized void addTrackToPlaylist(UUID playlistId, UUID trackId) {
         Playlist playlist = requirePlaylist(playlistId);
         Track track = requireTrack(trackId);
-        playlist.addTrack(track); // Set prevents a duplicate track in the same playlist.
+        playlist.addTrack(track);
     }
 
     public synchronized boolean removeTrackFromPlaylist(UUID playlistId, UUID trackId) {
@@ -137,7 +129,6 @@ public class PlaylistManager {
         userRepository.update(replacement);
     }
 
-    /** Removing a user also cancels that user's pending requests. */
     public synchronized boolean removeUser(UUID userId) {
         if (!userRepository.remove(userId).isPresent()) return false;
         cancelRequests(request -> request.getRequesterId().equals(userId));
@@ -153,7 +144,6 @@ public class PlaylistManager {
     }
 
 
-    /** LISTENER workflow: submit a request for an existing playable track. */
     public synchronized PlaybackRequest submitPlaybackRequest(User requester, UUID trackId, int priority) {
         if (requester == null) throw new IllegalArgumentException("Requester must not be null");
         User registeredRequester = userRepository.findById(requester.getId())
@@ -172,7 +162,6 @@ public class PlaylistManager {
         return request;
     }
 
-    /** OPERATOR workflow: poll and execute the highest-priority pending request. */
     public synchronized Optional<PlaybackRequest> processNextPlaybackRequest(User operator) {
         requireRole(operator, UserRole.OPERATOR);
         PlaybackRequest request = playbackQueue.poll();
@@ -196,7 +185,6 @@ public class PlaylistManager {
         return Optional.of(request);
     }
 
-    /** A listener can cancel their own request; an operator can cancel any request. */
     public synchronized boolean cancelPlaybackRequest(UUID requestId, User actor) {
         if (requestId == null || actor == null) {
             throw new IllegalArgumentException("Request ID and actor must not be null");
@@ -220,7 +208,6 @@ public class PlaylistManager {
         return Optional.ofNullable(requestsById.get(requestId));
     }
 
-    /** Returns a priority-ordered snapshot without exposing the live queue. */
     public synchronized List<PlaybackRequest> getPendingRequests() {
         PriorityQueue<PlaybackRequest> copy = new PriorityQueue<>(playbackQueue);
         List<PlaybackRequest> result = new ArrayList<>();
@@ -232,19 +219,14 @@ public class PlaylistManager {
         return playbackQueue.size();
     }
 
-    // ---------- Analytics ----------
-
-    /** Backward-compatible count: counts entries across all playlists. */
     public synchronized int getTotalTracks() {
         return getTotalPlaylistEntries();
     }
 
-    /** Number of distinct tracks registered in the library repository. */
     public synchronized int getLibraryTrackCount() {
         return trackRepository.size();
     }
 
-    /** Counts playlist entries; a track present in two playlists is counted twice. */
     public synchronized int getTotalPlaylistEntries() {
         int total = 0;
         for (Playlist playlist : playlistRepository.findAll()) {
