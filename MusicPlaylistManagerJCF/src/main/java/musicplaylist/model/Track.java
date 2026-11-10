@@ -3,10 +3,6 @@ package musicplaylist.model;
 import java.util.Objects;
 import java.util.UUID;
 
-/**
- * Common entity for songs, podcasts and audiobooks.
- * UUID is the immutable business key used by equals() and hashCode().
- */
 public abstract class Track implements Comparable<Track> {
     private final UUID id;
     private String title;
@@ -94,7 +90,6 @@ public abstract class Track implements Comparable<Track> {
                 getType(), artist, title, getFormattedDuration(), playCount);
     }
 
-    /** Category used by the repository index. Songs are grouped by genre. */
     public String getCategoryKey() {
         return getType();
     }
@@ -103,7 +98,6 @@ public abstract class Track implements Comparable<Track> {
 
     public abstract double calculateRoyalty();
 
-    /** Natural order: title, then artist, then ID for a deterministic result. */
     @Override
     public int compareTo(Track other) {
         Objects.requireNonNull(other, "Track to compare must not be null");
@@ -117,7 +111,6 @@ public abstract class Track implements Comparable<Track> {
         return result;
     }
 
-    /** All Track subclasses share the globally unique UUID identity contract. */
     @Override
     public final boolean equals(Object object) {
         if (this == object) {
