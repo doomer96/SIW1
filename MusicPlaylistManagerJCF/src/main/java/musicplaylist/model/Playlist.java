@@ -7,7 +7,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
-/** A playlist keeps unique tracks while preserving their insertion order. */
 public class Playlist {
     private final UUID id;
     private String name;
@@ -66,7 +65,6 @@ public class Playlist {
         return tracks.removeIf(track -> track.getId().equals(trackId));
     }
 
-    /** Backward-compatible removal by title from the first project. */
     public synchronized boolean removeTrack(String title) {
         if (title == null || title.trim().isEmpty()) {
             throw new IllegalArgumentException("Track title must not be empty");
@@ -74,7 +72,6 @@ public class Playlist {
         return tracks.removeIf(track -> track.getTitle().equalsIgnoreCase(title.trim()));
     }
 
-    /** Replaces the object in this playlist without changing its identity or position semantics. */
     public synchronized void replaceTrack(Track oldTrack, Track newTrack) {
         Objects.requireNonNull(oldTrack, "Old track must not be null");
         Objects.requireNonNull(newTrack, "New track must not be null");
