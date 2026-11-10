@@ -3,7 +3,6 @@ package musicplaylist.model;
 import java.util.Objects;
 import java.util.UUID;
 
-/** User roles: LISTENER submits playback requests; OPERATOR processes the queue. */
 public class User {
     private final UUID id;
     private String name;
