@@ -18,7 +18,6 @@ public class Song extends Track implements Playable, Downloadable {
         this.genre = requireText(genre, "Genre");
     }
 
-    /** Constructor used when replacing a track while preserving its primary key. */
     public Song(UUID id, String title, String artist, int durationSeconds, String album, String genre) {
         super(id, title, artist, durationSeconds);
         this.album = requireText(album, "Album");
